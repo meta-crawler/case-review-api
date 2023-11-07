@@ -1,0 +1,17 @@
+[
+  {
+    "model": "account.UserData",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$OI7K4pvNymWvmKzoYc7CnO$O/LMcI3y1fBtTfqs5zHO/Qymebbf7Bsc4GuVPcSL3tE=",
+      "name": "admin",
+      "email": "admin@test.com",
+      "date_joined": "2023-11-08 07:41:44.06836+08",
+      "is_admin": true,
+      "is_active": true,
+      "is_staff": true,
+      "is_superuser": false,
+      "team": 1
+    }
+  }
+]
