@@ -1,0 +1,26 @@
+[
+  {
+    "model": "api.CaseStatus",
+    "pk": 1,
+    "fields": {
+      "name": "No reviews",
+      "description": ""
+    }
+  },
+  {
+    "model": "api.CaseStatus",
+    "pk": 2,
+    "fields": {
+      "name": "Reviewing",
+      "description": ""
+    }
+  },
+  {
+    "model": "api.CaseStatus",
+    "pk": 3,
+    "fields": {
+      "name": "Review Submitted",
+      "description": ""
+    }
+  }
+]

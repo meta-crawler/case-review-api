@@ -1,0 +1,26 @@
+[
+  {
+    "model": "api.CaseReviewStatus",
+    "pk": 1,
+    "fields": {
+      "name": "ToDo",
+      "description": ""
+    }
+  },
+  {
+    "model": "api.CaseReviewStatus",
+    "pk": 2,
+    "fields": {
+      "name": "In Progress",
+      "description": ""
+    }
+  },
+  {
+    "model": "api.CaseReviewStatus",
+    "pk": 3,
+    "fields": {
+      "name": "Complete",
+      "description": ""
+    }
+  }
+]

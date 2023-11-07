@@ -1,0 +1,10 @@
+[
+  {
+    "model": "api.AlertType",
+    "pk": 1,
+    "fields": {
+      "name": "Object Obtrusion",
+      "description": ""
+    }
+  }
+]
