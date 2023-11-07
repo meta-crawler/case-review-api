@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 
-from .views import AlertApiView, CaseReviewApiView
+from .views import AlertApiView, CaseReviewApiView, CaseApiView
 
 
 def authenticated_view(view_class):
@@ -11,5 +11,6 @@ def authenticated_view(view_class):
 
 urlpatterns = [
     path('alert', authenticated_view(AlertApiView.as_view())),
-    path('case-review', authenticated_view(CaseReviewApiView.as_view()))
+    path('case-review', authenticated_view(CaseReviewApiView.as_view())),
+    path('case', authenticated_view(CaseApiView.as_view()))
 ]

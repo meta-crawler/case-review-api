@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 from account.models import UserData
-from .models import Alert, AlertType, CaseReview, CaseReviewStatus
-from .serializers import AlertSerializer, CaseReviewSerializer
+from .models import Alert, AlertType, CaseReview, CaseReviewStatus, Case, CaseStatus
+from .serializers import AlertSerializer, CaseReviewSerializer, CaseSerializer
 
 
 # Create your views here.
@@ -158,9 +158,13 @@ class CaseReviewApiView(CreateAPIView):
                 },
                 status=status.HTTP_201_CREATED
             )
-        except CaseReviewStatus.DoesNotExist:
-            return Response({'Message': 'CaseReviewStatus not found. Please provide the correct status_id'},
-                            status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response(
+                {
+                    'Message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def put(self, request, *args, **kwargs):
         case_review_id = request.GET.get('id')
@@ -194,9 +198,13 @@ class CaseReviewApiView(CreateAPIView):
                     },
                     status=status.HTTP_201_CREATED
                 )
-            except CaseReviewStatus.DoesNotExist:
-                return Response({'Message': 'CaseReviewStatus not found. Please provide the correct status_id'},
-                                status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                return Response(
+                    {
+                        'Message': str(e)
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
         except CaseReview.DoesNotExist:
             return Response({'Message': 'CaseReview not found. Please provide the correct case_review_id'},
                             status=status.HTTP_404_NOT_FOUND)
@@ -211,3 +219,121 @@ class CaseReviewApiView(CreateAPIView):
                             status=status.HTTP_204_NO_CONTENT)
         except CaseReview.DoesNotExist:
             return Response({'Message': 'CaseReview not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CaseApiView(CreateAPIView):
+    queryset = Case.objects.all()
+    serializer_class = CaseSerializer
+
+    def get(self, request, *args, **kwargs):
+        case_id = request.GET.get('id')
+        try:
+            if case_id is None or case_id == '':
+                queryset = Case.objects.select_related('alert', 'authority', 'case_review').all().order_by(
+                    '-created_at')
+            else:
+                queryset = Case.objects.select_related('alert', 'authority', 'case_review').filter(
+                    id=case_id)
+
+            serializer = CaseSerializer(queryset, many=True)
+
+            return Response(
+                {
+                    'data': serializer.data
+                },
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'Message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        serializer = CaseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            alert_id = serializer.validated_data.pop('alert', None)
+            alert_instance = Alert.objects.get(id=alert_id)
+            serializer.validated_data['alert'] = alert_instance
+
+            authority_id = serializer.validated_data.pop('authority', None)
+            authority_instance = UserData.objects.get(id=authority_id)
+            serializer.validated_data['authority'] = authority_instance
+
+            case_review_id = serializer.validated_data.pop('case_review', None)
+            case_review_instance = CaseReview.objects.get(id=case_review_id)
+            serializer.validated_data['case_review'] = case_review_instance
+
+            case = serializer.save()
+            case_obj = CaseSerializer(case).data
+
+            return Response(
+                {
+                    'data': case_obj,
+                },
+                status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'Message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def put(self, request, *args, **kwargs):
+        case_id = request.GET.get('id')
+
+        if case_id is None or case_id == '':
+            raise ValidationError({'Message': 'Please provide the case_id in the request data.'})
+
+        try:
+            instance = Case.objects.get(id=case_id)
+            serializer = CaseSerializer(instance, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            try:
+                alert_id = serializer.validated_data.pop('alert', None)
+                alert_instance = Alert.objects.get(id=alert_id)
+                serializer.validated_data['alert'] = alert_instance
+
+                authority_id = serializer.validated_data.pop('authority', None)
+                authority_instance = UserData.objects.get(id=authority_id)
+                serializer.validated_data['authority'] = authority_instance
+
+                case_review_id = serializer.validated_data.pop('case_review', None)
+                case_review_instance = CaseReview.objects.get(id=case_review_id)
+                serializer.validated_data['case_review'] = case_review_instance
+
+                case = serializer.save()
+                case_obj = CaseSerializer(case).data
+
+                return Response(
+                    {
+                        'data': case_obj,
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+            except Exception as e:
+                return Response(
+                    {
+                        'Message': str(e)
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except Case.DoesNotExist:
+            return Response({'Message': 'Case not found. Please provide the correct case_id'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, *args, **kwargs):
+        case_id = request.GET.get('id')
+
+        try:
+            instance = Case.objects.get(id=case_id)
+            instance.delete()
+            return Response({'Message': 'Case has been successfully deleted.'},
+                            status=status.HTTP_204_NO_CONTENT)
+        except Case.DoesNotExist:
+            return Response({'Message': 'Case not found.'}, status=status.HTTP_404_NOT_FOUND)
