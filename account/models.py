@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 # Create your models here.
 class Team(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(null=True, blank=True, max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

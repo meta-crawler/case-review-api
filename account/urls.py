@@ -13,8 +13,8 @@ def authenticated_view(view_class):
 
 
 urlpatterns = [
-    path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('register/', RegisterView.as_view(), name="sign_up"),
-    path('me/', authenticated_view(GetUserDataView).as_view()),
+    path('login', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('login/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+    path('register', RegisterView.as_view(), name="sign_up"),
+    path('me', authenticated_view(GetUserDataView).as_view()),
 ]

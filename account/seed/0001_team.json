@@ -4,6 +4,7 @@
     "pk": 1,
     "fields": {
       "name": "PTSM Pte Ltd",
+      "description": "Not wearing PPE Equipment",
       "created_at": "2023-11-08 07:41:44.06836+08",
       "updated_at": "2023-11-08 07:41:44.06836+08"
     }
