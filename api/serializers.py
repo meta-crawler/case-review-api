@@ -58,6 +58,7 @@ class CaseReviewSerializer(ModelSerializer):
 class CaseSerializer(ModelSerializer):
     authority = serializers.IntegerField(write_only=True)
     alert = serializers.IntegerField(write_only=True)
+    status = serializers.IntegerField(write_only=True)
     case_review = serializers.IntegerField(write_only=True)
 
     class Meta:
@@ -68,13 +69,14 @@ class CaseSerializer(ModelSerializer):
         representation = super().to_representation(instance)
         representation['authority'] = UserSerializer(instance.authority).data
         representation['alert'] = AlertSerializer(instance.alert).data
+        representation['status'] = CaseStatusSerializer(instance.alert).data
         representation['case_review'] = CaseReviewSerializer(instance.case_review).data
 
         return representation
 
 
 class CommentSerializer(ModelSerializer):
-    alert = serializers.IntegerField(write_only=True)
+    author = serializers.IntegerField(write_only=True)
     case = serializers.IntegerField(write_only=True)
 
     class Meta:

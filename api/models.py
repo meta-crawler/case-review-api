@@ -46,6 +46,7 @@ class CaseReview(models.Model):
 class Case(models.Model):
     alert = models.ForeignKey(Alert, on_delete=models.CASCADE, null=True)
     authority = models.ForeignKey(UserData, on_delete=models.CASCADE, null=True)
+    status = models.ForeignKey(CaseStatus, on_delete=models.CASCADE, null=True)
     case_review = models.ForeignKey(CaseReview, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

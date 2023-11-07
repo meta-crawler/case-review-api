@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 from account.models import UserData
-from .models import Alert, AlertType, CaseReview, CaseReviewStatus, Case, CaseStatus
-from .serializers import AlertSerializer, CaseReviewSerializer, CaseSerializer
+from .models import Alert, AlertType, CaseReview, CaseReviewStatus, Case, CaseStatus, Comment
+from .serializers import AlertSerializer, CaseReviewSerializer, CaseSerializer, CommentSerializer
 
 
 # Create your views here.
@@ -229,10 +229,10 @@ class CaseApiView(CreateAPIView):
         case_id = request.GET.get('id')
         try:
             if case_id is None or case_id == '':
-                queryset = Case.objects.select_related('alert', 'authority', 'case_review').all().order_by(
+                queryset = Case.objects.select_related('alert', 'authority', 'status', 'case_review').all().order_by(
                     '-created_at')
             else:
-                queryset = Case.objects.select_related('alert', 'authority', 'case_review').filter(
+                queryset = Case.objects.select_related('alert', 'authority', 'status', 'case_review').filter(
                     id=case_id)
 
             serializer = CaseSerializer(queryset, many=True)
@@ -262,6 +262,10 @@ class CaseApiView(CreateAPIView):
             authority_id = serializer.validated_data.pop('authority', None)
             authority_instance = UserData.objects.get(id=authority_id)
             serializer.validated_data['authority'] = authority_instance
+
+            status_id = serializer.validated_data.pop('status', None)
+            status_instance = CaseStatus.objects.get(id=status_id)
+            serializer.validated_data['status'] = status_instance
 
             case_review_id = serializer.validated_data.pop('case_review', None)
             case_review_instance = CaseReview.objects.get(id=case_review_id)
@@ -303,6 +307,10 @@ class CaseApiView(CreateAPIView):
                 authority_instance = UserData.objects.get(id=authority_id)
                 serializer.validated_data['authority'] = authority_instance
 
+                status_id = serializer.validated_data.pop('status', None)
+                status_instance = CaseStatus.objects.get(id=status_id)
+                serializer.validated_data['status'] = status_instance
+
                 case_review_id = serializer.validated_data.pop('case_review', None)
                 case_review_instance = CaseReview.objects.get(id=case_review_id)
                 serializer.validated_data['case_review'] = case_review_instance
@@ -337,3 +345,111 @@ class CaseApiView(CreateAPIView):
                             status=status.HTTP_204_NO_CONTENT)
         except Case.DoesNotExist:
             return Response({'Message': 'Case not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CommentApiView(CreateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+
+    def get(self, request, *args, **kwargs):
+        comment_id = request.GET.get('id')
+        try:
+            if comment_id is None or comment_id == '':
+                queryset = Comment.objects.select_related('author', 'case').all().order_by('-created_at')
+            else:
+                queryset = Comment.objects.select_related('author', 'case').filter(id=comment_id)
+
+            serializer = CommentSerializer(queryset, many=True)
+
+            return Response(
+                {
+                    'data': serializer.data
+                },
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'Message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request, *args, **kwargs):
+        serializer = CommentSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            author_id = serializer.validated_data.pop('author', None)
+            author_instance = UserData.objects.get(id=author_id)
+            serializer.validated_data['author'] = author_instance
+
+            case_id = serializer.validated_data.pop('case', None)
+            case_instance = Case.objects.get(id=case_id)
+            serializer.validated_data['case'] = case_instance
+
+            comment = serializer.save()
+            comment_obj = CommentSerializer(comment).data
+
+            return Response(
+                {
+                    'data': comment_obj,
+                },
+                status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'Message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def put(self, request, *args, **kwargs):
+        comment_id = request.GET.get('id')
+
+        if comment_id is None or comment_id == '':
+            raise ValidationError({'Message': 'Please provide the comment_id in the request data.'})
+
+        try:
+            instance = Comment.objects.get(id=comment_id)
+            serializer = CommentSerializer(instance, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            try:
+                author_id = serializer.validated_data.pop('author', None)
+                author_instance = UserData.objects.get(id=author_id)
+                serializer.validated_data['author'] = author_instance
+
+                case_id = serializer.validated_data.pop('case', None)
+                case_instance = Case.objects.get(id=case_id)
+                serializer.validated_data['case'] = case_instance
+
+                comment = serializer.save()
+                comment_obj = CommentSerializer(comment).data
+
+                return Response(
+                    {
+                        'data': comment_obj,
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+            except Exception as e:
+                return Response(
+                    {
+                        'Message': str(e)
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except Comment.DoesNotExist:
+            return Response({'Message': 'Comment not found. Please provide the correct comment_id'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, *args, **kwargs):
+        comment_id = request.GET.get('id')
+
+        try:
+            instance = Comment.objects.get(id=comment_id)
+            instance.delete()
+            return Response({'Message': 'Comment has been successfully deleted.'},
+                            status=status.HTTP_204_NO_CONTENT)
+        except Comment.DoesNotExist:
+            return Response({'Message': 'Comment not found.'}, status=status.HTTP_404_NOT_FOUND)
