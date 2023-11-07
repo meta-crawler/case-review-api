@@ -8,19 +8,19 @@ from .models import AlertType, Alert, CaseStatus, Case, CaseReviewStatus, CaseRe
 class AlertTypeSerializer(ModelSerializer):
     class Meta:
         model = AlertType
-        fields = ('name', 'description')
+        fields = '__all__'
 
 
 class CaseStatusSerializer(ModelSerializer):
     class Meta:
         model = CaseStatus
-        fields = ('name', 'description')
+        fields = '__all__'
 
 
 class CaseReviewStatusSerializer(ModelSerializer):
     class Meta:
         model = CaseReviewStatus
-        fields = ('name', 'description')
+        fields = '__all__'
 
 
 class AlertSerializer(ModelSerializer):
@@ -32,8 +32,7 @@ class AlertSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        if self.context['request'].method is 'GET':
-            representation['alert_type'] = AlertTypeSerializer(instance.alert_type).data
+        representation['alert_type'] = AlertTypeSerializer(instance.alert_type).data
 
         return representation
 
@@ -49,10 +48,9 @@ class CaseReviewSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        if self.context['request'].method is 'GET':
-            representation['authority'] = UserSerializer(instance.authority).data
-            representation['assigner'] = UserSerializer(instance.assigner).data
-            representation['status'] = CaseReviewStatusSerializer(instance.status).data
+        representation['authority'] = UserSerializer(instance.authority).data
+        representation['assigner'] = UserSerializer(instance.assigner).data
+        representation['status'] = CaseReviewStatusSerializer(instance.status).data
 
         return representation
 
@@ -68,10 +66,9 @@ class CaseSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        if self.context['request'].method is 'GET':
-            representation['authority'] = UserSerializer(instance.authority).data
-            representation['alert'] = AlertSerializer(instance.alert).data
-            representation['case_review'] = CaseReviewSerializer(instance.case_review).data
+        representation['authority'] = UserSerializer(instance.authority).data
+        representation['alert'] = AlertSerializer(instance.alert).data
+        representation['case_review'] = CaseReviewSerializer(instance.case_review).data
 
         return representation
 
@@ -86,8 +83,7 @@ class CommentSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        if self.context['request'].method is 'GET':
-            representation['author'] = UserSerializer(instance.author).data
-            representation['case'] = CaseSerializer(instance.case).data
+        representation['author'] = UserSerializer(instance.author).data
+        representation['case'] = CaseSerializer(instance.case).data
 
         return representation
