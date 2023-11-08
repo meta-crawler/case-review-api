@@ -1,11 +1,12 @@
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 from account.models import UserData
 from .models import Alert, AlertType, CaseReview, CaseReviewStatus, Case, CaseStatus, Comment
-from .serializers import AlertSerializer, CaseReviewSerializer, CaseSerializer, CommentSerializer
+from .serializers import AlertSerializer, CaseReviewSerializer, CaseSerializer, CommentSerializer, \
+    CommentByCaseSerializer
 
 
 # Create your views here.
@@ -451,5 +452,18 @@ class CommentApiView(CreateAPIView):
             instance.delete()
             return Response({'Message': 'Comment has been successfully deleted.'},
                             status=status.HTTP_204_NO_CONTENT)
+        except Comment.DoesNotExist:
+            return Response({'Message': 'Comment not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GetCommentsByCase(GenericAPIView):
+    def get(self, request):
+        case_id = request.GET.get('case_id')
+        try:
+            queryset = Comment.objects.filter(case_id=case_id)
+            comment_serializer = CommentByCaseSerializer(queryset, many=True)
+            comment_data = comment_serializer.data
+
+            return Response({'data': comment_data}, status=status.HTTP_200_OK)
         except Comment.DoesNotExist:
             return Response({'Message': 'Comment not found.'}, status=status.HTTP_404_NOT_FOUND)
