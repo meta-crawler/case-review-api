@@ -69,7 +69,7 @@ class CaseSerializer(ModelSerializer):
         representation = super().to_representation(instance)
         representation['authority'] = UserSerializer(instance.authority).data
         representation['alert'] = AlertSerializer(instance.alert).data
-        representation['status'] = CaseStatusSerializer(instance.alert).data
+        representation['status'] = CaseStatusSerializer(instance.status).data
         representation['case_review'] = CaseReviewSerializer(instance.case_review).data
 
         return representation

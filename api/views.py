@@ -467,3 +467,20 @@ class GetCommentsByCase(GenericAPIView):
             return Response({'data': comment_data}, status=status.HTTP_200_OK)
         except Comment.DoesNotExist:
             return Response({'Message': 'Comment not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GetCasesByAuthority(GenericAPIView):
+    def get(self, request):
+        authority_id = request.GET.get('authority_id')
+        try:
+            if authority_id is None or authority_id == '-1':
+                queryset = Case.objects.all()
+            else:
+                queryset = Case.objects.filter(authority_id=authority_id)
+            case_serializer = CaseSerializer(queryset, many=True)
+            case_data = case_serializer.data
+
+            return Response({'data': case_data}, status=status.HTTP_200_OK)
+
+        except Case.DoesNotExist:
+            return Response({'Message': 'Case not found.'}, status=status.HTTP_404_NOT_FOUND)

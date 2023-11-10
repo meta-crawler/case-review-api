@@ -26,3 +26,16 @@ class GetUserDataView(APIView):
             UserSerializer(request.user).data,
             status=status.HTTP_200_OK
         )
+
+
+class GetUserListView(APIView):
+    def get(self, request):
+        user_queryset = UserData.objects.all()
+        users = UserSerializer(user_queryset, many=True)
+
+        return Response(
+            {
+                'data': users.data
+            },
+            status=status.HTTP_200_OK
+        )
