@@ -501,12 +501,20 @@ class UpdateComments(GenericAPIView):
                 data['case'] = case_instance.id
 
                 comment_id = data.pop('id', None)
-                comment_instance = Comment.objects.get(id=comment_id)
-                comment_serializer = CommentMultipleUpdateSerializer(comment_instance, data=data)
-                comment_serializer.is_valid(raise_exception=True)
-                comment = comment_serializer.save()
-                comment_obj = CommentMultipleUpdateSerializer(comment).data
-                comments.append(comment_obj)
+                if int(comment_id) == -1:
+
+                    comment_serializer = CommentMultipleUpdateSerializer(data=data)
+                    comment_serializer.is_valid(raise_exception=True)
+                    comment = comment_serializer.save()
+                    comment_obj = CommentMultipleUpdateSerializer(comment).data
+                    comments.append(comment_obj)
+                else:
+                    comment_instance = Comment.objects.get(id=comment_id)
+                    comment_serializer = CommentMultipleUpdateSerializer(comment_instance, data=data)
+                    comment_serializer.is_valid(raise_exception=True)
+                    comment = comment_serializer.save()
+                    comment_obj = CommentMultipleUpdateSerializer(comment).data
+                    comments.append(comment_obj)
 
             return Response(
                 {
