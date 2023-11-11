@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from account.models import UserData
 from .models import Alert, AlertType, CaseReview, CaseReviewStatus, Case, CaseStatus, Comment
 from .serializers import AlertSerializer, CaseReviewSerializer, CaseSerializer, CommentSerializer, \
-    CommentByCaseSerializer
+    CommentByCaseSerializer, CommentMultipleUpdateSerializer
 
 
 # Create your views here.
@@ -484,3 +484,40 @@ class GetCasesByAuthority(GenericAPIView):
 
         except Case.DoesNotExist:
             return Response({'Message': 'Case not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class UpdateComments(GenericAPIView):
+
+    def put(self, request):
+        try:
+            comments = []
+            for data in request.data:
+                author_id = data.pop('author', None)
+                author_instance = UserData.objects.get(id=author_id)
+                data['author'] = author_instance.id
+
+                case_id = data.pop('case', None)
+                case_instance = Case.objects.get(id=case_id)
+                data['case'] = case_instance.id
+
+                comment_id = data.pop('id', None)
+                comment_instance = Comment.objects.get(id=comment_id)
+                comment_serializer = CommentMultipleUpdateSerializer(comment_instance, data=data)
+                comment_serializer.is_valid(raise_exception=True)
+                comment = comment_serializer.save()
+                comment_obj = CommentMultipleUpdateSerializer(comment).data
+                comments.append(comment_obj)
+
+            return Response(
+                {
+                    'data': comments,
+                },
+                status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            return Response(
+                {
+                    'Message': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

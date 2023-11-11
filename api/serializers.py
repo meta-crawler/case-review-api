@@ -101,3 +101,15 @@ class CommentByCaseSerializer(ModelSerializer):
         representation['author'] = UserSerializer(instance.author).data
 
         return representation
+
+
+class CommentMultipleUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['author'] = UserSerializer(instance.author).data
+
+        return representation
