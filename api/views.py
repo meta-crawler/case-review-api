@@ -474,9 +474,9 @@ class GetCasesByAuthority(GenericAPIView):
         authority_id = request.GET.get('authority_id')
         try:
             if authority_id is None or authority_id == '-1':
-                queryset = Case.objects.all()
+                queryset = Case.objects.all().order_by('-updated_at')
             else:
-                queryset = Case.objects.filter(authority_id=authority_id)
+                queryset = Case.objects.filter(authority_id=authority_id).order_by('-updated_at')
             case_serializer = CaseSerializer(queryset, many=True)
             case_data = case_serializer.data
 
