@@ -66,3 +66,11 @@ In virtual env terminal, please run:
 ```bash
 python3 manage.py runserver
 ```
+
+### 5. Demo DB
+
+If you want to quick test, you can use dummy db by running:
+
+```bash
+psql -U postgres -h 127.0.0.1 -p 5432 -d case_review -f demo_db.sql
+```
