@@ -22,6 +22,8 @@ You need to change `DB_USER` and `DB_PASSWORD` for your PostgreSQL Database.
 
 Then make `.env` in `case_review` directory.
 
+![Screenshot_1](https://github.com/meta-crawler/case-review-api/assets/114304642/df184a01-a579-4a42-a766-a001701e2d18)
+
 ### 1. Clone Repo
 
 If you want to clone this repo, go to the command line and run:
